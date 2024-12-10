@@ -133,7 +133,7 @@ class Animal {
 }
 
 class Player {
-    constructor({position, velocity, image, frames = {max: 1} , sprites, direction}){
+    constructor({position, image, frames = {max: 1} , sprites, direction}){
         this.position = position
         this.image = image
         this.frames = {...frames, val: 0, elapsed: 0}
@@ -252,6 +252,25 @@ class Player {
             if (this.frames.val < 3) this.frames.val++
             else this.frames.val = 0
         }
+    }else if (marcador == 6){
+        console.log(this.frames.val)
+        ctx.drawImage(
+            this.image,
+            this.frames.val * this.width,
+            432,
+            this.image.width/ this.frames.max,
+            this.image.height/10,
+            this.position.x - 25,
+            this.position.y - 40,
+            this.image.width/ this.frames.max * 2,
+            this.image.height/10 * 2
+        )
+        if (this.frames.max > 1) {
+            this.frames.elapsed++
+        }   
+        if (this.frames.elapsed % 110 === 0){
+            if (this.frames.val < 3) this.frames.val++
+        } 
     }
 }
 }
@@ -262,43 +281,48 @@ class monsterSprite {
         this.image = image
         this.frames = {...frames, val: 0, elapsed: 0}
         this.image.onload = () => {
-            this.width = this.image.width / this.frames.max
-            this.height = this.image.height
+            this.width = this.image.width / 2 //32
+            this.height = this.image.height / 2 //32
         }
         this.sprites = sprites
     }
 
-    draw(alive) {
+    draw(alive, move) {
+        ctx.fillStyle = 'rgba(255, 0, 0, 0)'
+        ctx.fillRect(this.position.x, this.position.y, this.width, this.height)
         if (alive){
         ctx.drawImage(
             this.image,
-            0, // Ponto de início no eixo x da imagem
-            this.frames.val * this.height/4  , // Ponto de início no eixo y da imagem
-            this.image.width/ this.frames.max, 
-            this.height/4, // Altura completa da imagem
+            move, // Ponto de início no eixo x da imagem
+            this.frames.val * this.height / 2 , // Ponto de início no eixo y da imagem
+            this.width / 2, 
+            this.height / 2, // Altura completa da imagem
             this.position.x,
-            this.position.y,
-            this.width*2, //
-            this.height/2 // Altura completa na tela
+            this.position.y,    
+            this.width,
+            this.height // Altura completa na tela
         )    
             this.frames.elapsed++;
 
-        if (this.frames.elapsed % 20 === 0) {
-            // Alterna o frame
-            this.frames.val = (this.frames.val + 1) % this.frames.max;
+            if (this.frames.max > 1) {
+                this.frames.elapsed++
+            }   
+            if (this.frames.elapsed % 30 === 0){
+                if (this.frames.val < 3) this.frames.val++
+                else this.frames.val = 0
             }
          
         }else{
             ctx.drawImage(
                 this.image,
                 16, // Ponto de início no eixo x da imagem
-                this.frames.val * this.height/4  , // Ponto de início no eixo y da imagem
-                this.image.width/ this.frames.max, 
-                this.height/4, // Altura completa da imagem
+                this.frames.val * this.height/2  , // Ponto de início no eixo y da imagem
+                this.width / 2, 
+                this.height /2 , // Altura completa da imagem
                 this.position.x,
                 this.position.y,
-                this.width*2, //
-                this.height/2 // Altura completa na tela
+                this.width, //
+                this.height // Altura completa na tela
             )      
         } 
     }

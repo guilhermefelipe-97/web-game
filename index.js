@@ -27,6 +27,8 @@ const playerUpAttackImage = new Image();
 playerUpAttackImage.src = "./images/player.png";
 const playerDownAttackImage = new Image();
 playerDownAttackImage.src = "./images/player.png";
+const deadPlayer = new Image();
+deadPlayer.src = "./images/player.png";
 const npc1Image = new Image();
 npc1Image.src = "./images/npc1.png";
 const npc2Image = new Image();
@@ -51,12 +53,13 @@ canvas.width = 1024;
 canvas.height = 576;
 let i = 0, j = 0, k = 0, contador = 0;
 let marcadorA = false, marcadorS = true, marcadorD = false, marcadorW = false, marcadorGlobal = false
-let marcador1, marcador2, marcador3, alive1 = true, alive2 = true, alive3 =true
+let marcador1 = false, marcador2 = false, marcador3 = false, alive1 = true, alive2 = true, alive3 =true
 let contadorMonstro = 0
 let correr, correr1
 const alives = [alive1, alive2, alive3]
 const collisionsMap = []
 let lastKey = ''
+let move, moving = true
 
 for (let i = 0; i < collisions.length; i+=54){
     collisionsMap.push(collisions.slice(i, 54 + i))
@@ -343,30 +346,34 @@ function animate(){
     boundaries.forEach((boundary) =>{
         boundary.draw()
     })
-    monster.draw(alives[0])
-    monster1.draw(alives[1])
-    monster2.draw(alives[2])
+    monster.draw(alives[0], move)
+    monster1.draw(alives[1], move)
+    monster2.draw(alives[2], move)
 
-    if (keys.space.pressed === true && marcadorA === true){
-        player.direction = 336
-        for(i = 0; i < 3; i++) player.draw(4)
-    }else if (keys.space.pressed === true && marcadorW){
-        player.direction = 384
-        for(i = 0; i < 3; i++) player.draw(5)
-    }else if (keys.space.pressed === true && marcadorS){
-        player.direction = 288
-        for(i = 0; i < 3; i++) player.draw(5)
-    }else if (keys.space.pressed === true && marcadorD){
-        player.direction = 336
-        for(i = 0; i < 3; i++) player.draw(5)
-    }else{
-        if (keys.w.pressed === false && keys.s.pressed === false && keys.a.pressed === false && keys.d.pressed === false){
-            player.draw(3)
-        }else if (marcadorA == true){
-            player.draw(1)
+    if (marcador1 == false){
+        if (keys.space.pressed === true && marcadorA === true){
+            player.direction = 336
+            for(i = 0; i < 3; i++) player.draw(4)
+        }else if (keys.space.pressed === true && marcadorW){
+            player.direction = 384
+            for(i = 0; i < 3; i++) player.draw(5)
+        }else if (keys.space.pressed === true && marcadorS){
+            player.direction = 288
+            for(i = 0; i < 3; i++) player.draw(5)
+        }else if (keys.space.pressed === true && marcadorD){
+            player.direction = 336
+            for(i = 0; i < 3; i++) player.draw(5)
         }else{
-            player.draw(2)
+            if (keys.w.pressed === false && keys.s.pressed === false && keys.a.pressed === false && keys.d.pressed === false){
+                player.draw(3)
+            }else if (marcadorA == true){
+                player.draw(1)
+            }else{
+                player.draw(2)
+            }
         }
+    }else{
+        player.draw(6)
     }
 
     foreground.draw()
@@ -384,8 +391,7 @@ function animate(){
     life2.draw(marcador2)
     life3.draw(marcador3)
 
-    let moving = true
-    player.moving = false
+    if (marcador1 == false) moving = true
     monsters.forEach(mst=>{
         if (correr == 1){
             for (let i = 0; i < boundaries.length; i++){
@@ -474,7 +480,7 @@ function animate(){
         marcadorS = false;
         marcadorD = false;
         marcadorW = true;
-        player.moving = true
+        if (marcador1 == false) player.moving = true
         player.image = player.sprites.up
         player.direction = 240
         for (let i = 0; i < boundaries.length; i++){
@@ -526,7 +532,7 @@ function animate(){
         marcadorS = false;
         marcadorD = false;
         marcadorW = false;
-        player.moving = true
+        if (marcador1 == false) player.moving = true
         player.image = player.sprites.left
         player.direction = 192
         for (let i = 0; i < boundaries.length; i++){
@@ -576,7 +582,7 @@ function animate(){
         marcadorS = false;
         marcadorD = true;
         marcadorW = false;
-        player.moving = true
+        if (marcador1 == false) player.moving = true
         player.image = player.sprites.right
         player.direction = 192
         for (let i = 0; i < boundaries.length; i++){
@@ -627,7 +633,7 @@ function animate(){
         marcadorS = true;
         marcadorD = false;
         marcadorW = false;
-        player.moving = true
+        if (marcador1 == false) player.moving = true
         player.image = player.sprites.down
         player.direction = 144
         for (let i = 0; i < boundaries.length; i++){
@@ -686,9 +692,13 @@ function animate(){
                 }else if (contador == 2){
                     marcador2 = true
                 }else if (contador == 3){
+                    player.frames.val = 0
                     marcador1 = true
-                    gameover.style.backgroundImage = "url('images/gameover.png')"
-                    gameover.style.display = "block"
+                    moving = false
+                    setTimeout(() => {
+                        gameover.style.backgroundImage = "url('images/gameover.png')"
+                        gameover.style.display = "block"
+                    }, 2600);
                 }
             }
             ultimaExecucao[i] = Date.now();
@@ -700,23 +710,21 @@ function animate(){
         }
     
         if (alives[i] == true){
-        if (mst.moving == true && marcadorGlobal == false){
-            correr = andar()
-            marcadorGlobal = true
+            if (mst.moving == true && marcadorGlobal == false){
+                correr = andar()
+                marcadorGlobal = true
+            }
+
+            if (correr == 1 && mst.moving == true){
+                andarMonstroDireita(mst)
+            }else if(correr == 2 && mst.moving == true){
+                andarMonstroEsquerda(mst)
+            }else if (correr == 3 && mst.moving == true){
+                andarMonstroCima(mst)
+            }else if (correr == 4 && mst.moving == true){
+                andarMonstroBaixo(mst)
+            }
         }
-    
-        
-        if (correr == 1 && mst.moving == true){
-            andarMonstroDireita(mst)
-        }else if(correr == 2 && mst.moving == true){
-            andarMonstroEsquerda(mst)
-        }else if (correr == 3 && mst.moving == true){
-            andarMonstroCima(mst)
-        }else if (correr == 4 && mst.moving == true){
-            andarMonstroBaixo(mst)
-        }
-        }
-    
         correr1 = andar()
         if (mst.moving == false){
             if (correr1 == correr){
@@ -728,23 +736,29 @@ function animate(){
         }
     })
     if ((alives[0] === false) && (alives[1] === false) && (alives[2] === false)){
-        gameover.style.backgroundImage = "url('images/youwin.png')"
-        gameover.style.display = "block"
-    } 
+        setTimeout(() => {
+            gameover.style.backgroundImage = "url('images/youwin.png')"
+            gameover.style.display = "block"
+        }, 2600); 
+    }
 }
     animate()
 
     function andarMonstroDireita(mst){
         mst.position.x += 0.5
+        move = 48
     }
     function andarMonstroCima(mst){
         mst.position.y -= 0.5
+        move = 0
     }
     function andarMonstroBaixo(mst){
         mst.position.y += 0.5
+        move = 0
     }
     function andarMonstroEsquerda(mst){
         mst.position.x -= 0.5
+        move = 32
     }
 
     function andar() {
